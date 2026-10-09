@@ -12,13 +12,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("file", type=Path, help="iTunes-Exportdatei (UTF-16, tabgetrennt)")
     parser.add_argument("release", type=int, help="Nummer des Releases, z. B. 108")
     parser.add_argument(
-        "--sql", action="store_true", help="Tracks als SQL-INSERT-Statements ausgeben"
+        "--sql", action="store_true", help="Tracks als SQL-INSERT-Statements in eine .sql-Datei neben der Eingabedatei schreiben"
     )
     args = parser.parse_args(argv)
 
     tracks = parse_tracks(args.file, args.release)
     if args.sql:
-        print("\n".join(insert_statements(tracks)))
+        target = args.file.with_suffix(".sql")
+        target.write_text("\n".join(insert_statements(tracks)) + "\n", encoding="utf-8")
+        print(f"{len(tracks)} Tracks nach {target} geschrieben")
         return
 
     for t in tracks:
